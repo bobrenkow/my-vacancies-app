@@ -38,15 +38,9 @@ form.tried label:has(:invalid),form.tried .chips:has(:invalid){color:#d92d2d!imp
 @media(max-width:700px){.f{margin:0 10px 10px;padding:10px}.f label{flex:1 1 45%}.f select,.f input[type=search]{min-width:0;max-width:none;width:100%}select,input,textarea{font-size:16px}
 .w{margin:0 6px 20px}.c-category_uk,.c-citizenship_uk,.c-lastsub,.c-age{display:none}header{padding:10px}#pn{padding:14px}.g{grid-template-columns:110px 1fr}}
 </style></head><body>
-<header><h1 id="ttl">Робота Вакансії</h1><span id="cnt"></span><nav id="nv"></nav></header>
+<header><a href="index.html" style="text-decoration:none;color:inherit"><h1 id="ttl">Робота Вакансії</h1></a><span id="cnt"></span><nav id="nv"></nav></header>
 <div class="f" id="f"></div>
 <div class="w"><table><thead><tr id="h"></tr></thead><tbody id="b"></tbody></table></div>
-<div id="reg"><form id="rf"><h2>Реєстрація кандидата</h2><p class="m">Зареєструйтесь, щоб переглядати вакансії.</p>
-<label>Прізвище<b class="rq">*</b><input id="rsn" required></label><label>Ім’я<b class="rq">*</b><input id="rn" required></label>
-<label>Телефон<b class="rq">*</b><input id="rp" type="tel" required></label><label>Email<b class="rq">*</b><input id="re" type="email" required></label>
-<label>Громадянство<b class="rq">*</b><select id="rc" required></select></label><label>Місто, де шукаєте роботу<input id="rt"></label><label>Бажана спеціальність<input id="rs2"></label>
-<label class="chk"><input type="checkbox" id="rk" required>Погоджуюсь на обробку моїх персональних даних<b class="rq">*</b></label>
-<button class="p" type="submit">Зареєструватись і дивитись вакансії</button></form></div>
 <div id="md"><div id="pn"></div></div>
 <script>
 
@@ -55,7 +49,7 @@ const TG=window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData?Telegram.Web
 const $=i=>document.getElementById(i),U=a=>[...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y,'uk'));
 const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}},sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const KEY='rv_cand',RK='rv_resume',AK='rv_apps',RQ='<b class="rq">*</b>';
+const KEY='rv_cand',RK='rv_resume',AK='rv_apps',CK='rv_cid',RQ='<b class="rq">*</b>';
 let U0=ld(KEY,null),DH=null,LANG=ld('rv_lang','uk'),FAV=new Set(ld('rv_fav',[])),FV=false,ST={apps:[],subs:[]},S={k:'status',d:1};
 D.forEach(r=>{r._s=[r.id,r.title,r.specialty,r.city,r.description,r.terms,r.country_uk].join(' ').toLowerCase()});
 const MON=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
@@ -64,7 +58,7 @@ const EDU=['Неповна середня','Повна середня','Проф
 const START=['Вже готовий(-а) почати','Протягом тижня','Протягом місяця'],COUNTRIES=['Україна','Польща','Білорусь','Молдова','Вірменія','Грузія','Інше'];
 const LANGS=['Польська','Англійська','Українська','Російська','Німецька','Чеська','Словацька','Угорська','Румунська','Італійська','Іспанська','Французька','Литовська','Болгарська','Інша'];
 const DOCSEL=['Біометричний паспорт','Паспорт ЄС','Паспорт + віза','Карта побиту','Дозвіл на роботу','Тимчасовий захист (UA)','Інше'],YEARS=['Без досвіду','до 1 року','1–3 роки','3–5 років','5+ років'];
-const CITS=U(D.flatMap(r=>r.citizenship_uk)).filter(c=>c!='Усі країни').concat('Інше');
+const CITS=U(D.flatMap(r=>Array.isArray(r.citizenship_uk)?r.citizenship_uk:[])).filter(c=>c!='Усі країни').concat('Інше');
 const opt=(a,s)=>a.map(x=>`<option value="${x}"${x==s?' selected':''}>${x}</option>`).join(''),optr=(a,s)=>'<option value="">Оберіть…</option>'+opt(a,s),range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
 const bstr=b=>b&&b.d?`${String(b.d).padStart(2,'0')}.${String(b.m).padStart(2,'0')}.${b.y}`:'',langStr=L=>(L||[]).map(x=>x.l+' — '+x.lv).join('; ');
 const dateSel=b=>{b=b||{};return `<div style="display:flex;gap:6px"><select id="bd" required><option value="">День</option>${opt(range(1,31),b.d)}</select><select id="bm" required><option value="">Місяць</option>${MON.map((m,i)=>`<option value="${i+1}"${b.m==i+1?' selected':''}>${m}</option>`).join('')}</select><select id="by" required><option value="">Рік</option>${opt(range(1950,new Date().getFullYear()-16).reverse(),b.y)}</select></div>`};
@@ -73,7 +67,7 @@ const catHtml=C=>CATS.map(c=>`<label class="chk"><input type="checkbox" class="c
 const eduHtml=v=>`<div class="chips">${EDU.map((x,i)=>`<label><input type="radio" name="edu" value="${x}"${x==v?' checked':''}${i?'':' required'}>${x}</label>`).join('')}</div>`;
 function shrink(file,max=1600,q=.82){return new Promise((ok,no)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',q).split(',')[1])};img.onerror=()=>no(new Error('bad image'));img.src=u})}
 function resumeHtml(){const R=ld(RK,{}),A=ld(AK,[]),row=(k,v)=>v?`<tr><th>${k}</th><td>${esc(v)}</td></tr>`:'';
- return `<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><title>Резюме ${esc(U0.surname)} ${esc(U0.name)}</title><style>body{font:15px/1.5 Arial,sans-serif;max-width:760px;margin:30px auto;padding:0 16px;color:#1d2330}h1{margin:0}h2{border-bottom:2px solid #2d5bd3;padding-bottom:3px;margin-top:26px;font-size:17px}table{border-collapse:collapse;width:100%}th{text-align:left;width:210px;vertical-align:top;color:#555;padding:4px 8px 4px 0}td{padding:4px 0;white-space:pre-wrap}.t td,.t th{border-bottom:1px solid #ddd;width:auto;padding:5px 8px}.m{color:#666;font-size:13px}@media print{button{display:none}}</style></head><body><button onclick="print()" style="float:right">Друк / PDF</button><h1>${esc(U0.surname)} ${esc(U0.name)}</h1><div class="m">Тел.: ${esc(U0.phone)} · Email: ${esc(U0.email)}</div><h2>Загальні дані</h2><table>${row('Дата народження',bstr(R.birth))}${row('Громадянство',[R.citizenship||U0.citizenship,R.citizenship2].filter(Boolean).join(', '))}${row('Проживає зараз',[R.rcountry,R.rcity].filter(Boolean).join(', '))}${row('Освіта',[R.edu,R.uni].filter(Boolean).join(', '))}${row('Документи',R.docs)}${row('Мови',langStr(R.langs))}${row('Права водія',(R.license||[]).join(', ')||'немає')}${row('Готовий розпочати',R.start)}${row('Потрібне житло',R.housing?'так':'')}${row('Бажана спеціальність',U0.specialty)}</table><h2>Досвід роботи</h2><table>${row('Загальний стаж',R.years)}${row('Де і ким працював(-ла)',R.experience)}${row('Про себе',R.about)}</table><h2>Відгуки на вакансії (${A.length})</h2><table class="t"><tr><th>Дата</th><th>ID</th><th>Вакансія</th><th>Місто</th></tr>${A.map(a=>`<tr><td>${esc(a.date)}</td><td>${a.id}</td><td>${esc(a.title)}</td><td>${esc(a.city)}</td></tr>`).join('')}</table><p class="m">Оновлено: ${new Date().toLocaleString('uk')}</p></body></html>`}
+ return `<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><title>Резюме ${esc(U0.surname)} ${esc(U0.name)}</title><style>body{font:15px/1.5 Arial,sans-serif;max-width:760px;margin:30px auto;padding:0 16px;color:#1d2330}h1{margin:0}h2{border-bottom:2px solid #2d5bd3;padding-bottom:3px;margin-top:26px;font-size:17px}table{border-collapse:collapse;width:100%}th{text-align:left;width:210px;vertical-align:top;color:#555;padding:4px 8px 4px 0}td{padding:4px 0;white-space:pre-wrap}.t td,.t th{border-bottom:1px solid #ddd;width:auto;padding:5px 8px}.m{color:#666;font-size:13px}@media print{button{display:none}}</style></head><body><button onclick="print()" style="float:right">Друк / PDF</button><h1>${esc(U0.surname)} ${esc(U0.name)}</h1><div class="m">ID: ${esc(U0.candidate_id)} · Тел.: ${esc(U0.phone)} · Email: ${esc(U0.email)}${U0.tg_username?' · Telegram: '+esc(U0.tg_username):''}</div><h2>Загальні дані</h2><table>${row('Дата народження',bstr(R.birth))}${row('Громадянство',[R.citizenship||U0.citizenship,R.citizenship2].filter(Boolean).join(', '))}${row('Проживає зараз',[R.rcountry,R.rcity].filter(Boolean).join(', '))}${row('Освіта',[R.edu,R.uni].filter(Boolean).join(', '))}${row('Документи',R.docs)}${row('Мови',langStr(R.langs))}${row('Права водія',(R.license||[]).join(', ')||'немає')}${row('Готовий розпочати',R.start)}${row('Потрібне житло',R.housing?'так':'')}${row('Бажана спеціальність',U0.specialty)}</table><h2>Досвід роботи</h2><table>${row('Загальний стаж',R.years)}${row('Де і ким працював(-ла)',R.experience)}${row('Про себе',R.about)}</table><h2>Відгуки на вакансії (${A.length})</h2><table class="t"><tr><th>Дата</th><th>ID</th><th>Вакансія</th><th>Місто</th></tr>${A.map(a=>`<tr><td>${esc(a.date)}</td><td>${a.id}</td><td>${esc(a.title)}</td><td>${esc(a.city)}</td></tr>`).join('')}</table><p class="m">Оновлено: ${new Date().toLocaleString('uk')}</p></body></html>`}
 function crc32(u){let c,T=crc32.t||(crc32.t=Array.from({length:256},(_,n)=>{c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;return c>>>0}));let r=-1;for(const b of u)r=T[(r^b)&255]^(r>>>8);return(r^-1)>>>0}
 function zip(files){const E=new TextEncoder(),P=[],G=[],w16=(a,v)=>a.push(v&255,v>>8&255),w32=(a,v)=>a.push(v&255,v>>8&255,v>>16&255,v>>>24&255);let off=0;
  for(const[n,s]of files){const nb=E.encode(n),d=E.encode(s),c=crc32(d),h=[],g=[];
@@ -89,8 +83,8 @@ function xlsx(rows){const X=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','
  ['xl/workbook.xml',H+`<workbook xmlns="${N}spreadsheetml/2006/main" xmlns:r="${RT}"><sheets><sheet name="Відгуки" sheetId="1" r:id="rId1"/></sheets></workbook>`],
  ['xl/_rels/workbook.xml.rels',H+`<Relationships xmlns="${N}package/2006/relationships"><Relationship Id="rId1" Type="${RT}/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`],
  ['xl/worksheets/sheet1.xml',H+`<worksheet xmlns="${N}spreadsheetml/2006/main"><cols><col min="1" max="30" width="22" customWidth="1"/></cols><sheetData>${sd}</sheetData></worksheet>`]])}
-const HDR=['Дата відгуку','ID вакансії','Вакансія','Місто вакансії','Країна вакансії','Прізвище','Ім’я','Телефон','Email','Дата народження','Громадянство','Друге громадянство','Країна проживання','Місто проживання','Освіта','Навчальний заклад','Загальний стаж','Досвід роботи','Документи','Мови','Права водія','Коли почати','Потрібне житло','Про себе'];
-const xRows=()=>[HDR,...ld(AK,[]).map(a=>{const s=a.snap||{};return [a.date,a.id,a.title,a.city,a.country||'',s.surname,s.name,s.phone,s.email,bstr(s.birth),s.citizenship,s.citizenship2,s.rcountry,s.rcity,s.edu,s.uni,s.years,s.experience,s.docs,langStr(s.langs),(s.license||[]).join(', ')||'немає',s.start,s.housing?'так':'',s.about]})];
+const HDR=['Дата відгуку','ID вакансії','Вакансія','Місто вакансії','Країна вакансії','Прізвище','Ім’я','Телефон','Email','Дата народження','Громадянство','Друге громадянство','Країна проживання','Місто проживання','Освіта','Навчальний заклад','Загальний стаж','Досвід роботи','Документи','Мови','Права водія','Коли почати','Потрібне житло','Про себе','Нік Telegram'];
+const xRows=()=>[HDR,...ld(AK,[]).map(a=>{const s=a.snap||{};return [a.date,a.id,a.title,a.city,a.country||'',s.surname,s.name,s.phone,s.email,bstr(s.birth),s.citizenship,s.citizenship2,s.rcountry,s.rcity,s.edu,s.uni,s.years,s.experience,s.docs,langStr(s.langs),(s.license||[]).join(', ')||'немає',s.start,s.housing?'так':'',s.about,s.tg_username||'']})];
 async function saveFiles(){const b=`${U0.surname}_${U0.name}`,fs=[[`Резюме_${b}.html`,new Blob([resumeHtml()],{type:'text/html'})],[`Відгуки_${b}.xlsx`,xlsx(xRows())]];
  try{if(window.showDirectoryPicker){if(!DH)DH=await showDirectoryPicker({mode:'readwrite'});for(const[n,f]of fs){const w=await(await DH.getFileHandle(n,{create:true})).createWritable();await w.write(f);await w.close()}return 'file'}}catch(e){if(e.name=='AbortError')return 'cancel';DH=null}
  for(const[n,f]of fs){const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=n;a.click()}return 'dl'}
@@ -179,7 +173,10 @@ ID вакансії (необов’язково)|ID oferty (opcjonalnie)|Vacanc
 Про себе|O sobie|About you
 Фото документів (до 10, необов’язково)|Zdjęcia dokumentów (do 10, opcjonalnie)|Document photos (up to 10, optional)
 Погоджуюсь передати фото документів рекрутеру|Zgadzam się przekazać zdjęcia dokumentów rekruterowi|I agree to share document photos with the recruiter
-Надіслати відгук|Wyślij zgłoszenie|Submit application`.split('\n').forEach(l=>{const p=l.split('|');DICT[p[0]]=[p[1],p[2]]});
+Надіслати відгук|Wyślij zgłoszenie|Submit application
+Нік у Telegram|Nick w Telegramie|Telegram nickname
+Контакт (телефон або нік Telegram)|Kontakt (telefon lub nick Telegram)|Contact (phone or Telegram nick)
+Очистити дані|Wyczyść dane|Clear data`.split('\n').forEach(l=>{const p=l.split('|');DICT[p[0]]=[p[1],p[2]]});
 function L(){if(LANG=='uk'&&!L.d)return;const ix=LANG=='pl'?0:1,w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
  while(n=w.nextNode()){if(n.parentNode.tagName=='SCRIPT')continue;if(n.__o===undefined)n.__o=n.nodeValue;const t=n.__o.trim();if(!t)continue;const x=LANG!='uk'&&DICT[t];n.nodeValue=x?n.__o.replace(t,x[ix]):n.__o}
  document.querySelectorAll('[placeholder]').forEach(e=>{if(e.__p===undefined)e.__p=e.placeholder;const x=LANG!='uk'&&DICT[e.__p];e.placeholder=x?x[ix]:e.__p});L.d=0}
@@ -218,7 +215,7 @@ function draw(){const R=rows();$('cnt').textContent=R.length+' / '+D.length;
  $('b').innerHTML=R.map(r=>`<tr class="r" data-id="${r.id}">${COLS.map(c=>`<td class="c-${c.k}${c.t?' t':''}">${c.f(r)}</td>`).join('')}</tr>`).join('');$('sk').value=S.k;L()}
 function nav(){$('nv').innerHTML=CAND?`<button id="bfav"${FV?' class="on"':''}>♥ <span>Улюблені</span> <b>${FAV.size}</b></button><button id="bmsg">✉ <span>Рекрутеру</span></button><div id="lgw"><button id="lgb">${FLAG[LANG]} <span>${LN[LANG]}</span></button><div id="lgm" hidden>${Object.keys(LN).map(k=>`<div data-l="${k}">${FLAG[k]} ${LN[k]}</div>`).join('')}</div></div><span id="usr"></span>`
  :`<button id="bap">📨 <span>Відгуки</span> <b>${ST.apps.length}</b></button>`;gate();L()}
-function gate(){$('reg').style.display=CAND&&!U0?'flex':'none';const u=$('usr');if(u)u.innerHTML=CAND&&U0?`${esc(U0.surname)} ${esc(U0.name)}${TG?'':' · <a href="#" id="mr">Моє резюме</a>'} · <a href="#" id="lo">Вийти</a>`:''}
+function gate(){const u=$('usr');if(u)u.innerHTML=CAND&&U0?`${esc(U0.surname)} ${esc(U0.name)}${TG?'':' · <a href="#" id="mr">Моє резюме</a>'} · <a href="#" id="lo">Очистити дані</a>`:''}
 const openP=h=>{$('pn').innerHTML=h;$('md').classList.add('on');L()},closeP=()=>$('md').classList.remove('on');
 function post(o){if(HOOK)fetch(HOOK,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(o)}).catch(()=>{})}
 function send(type,data){const u=TG&&TG.initDataUnsafe&&TG.initDataUnsafe.user||{},o={type,time:new Date().toISOString(),...(TG?{tg_id:u.id,tg_username:u.username?'@'+u.username:''}:{}),...data};
@@ -242,11 +239,16 @@ function addSub(v){const c=$('sid').value.trim(),d=$('sdt').value;if(!/^\d{5}$/.
 function delSub(v,c){ST.subs=ST.subs.filter(s=>!(s.vacancy_id==v&&s.candidate_id==c));post({type:'unsubmit',token:TOKEN,vacancy_id:v,candidate_id:c});openP(panel(D.find(r=>r.id==v)));draw()}
 function appsPanel(){const A=ST.apps.slice().reverse();return `<button id="cl" style="float:right">✕ Закрити</button><h2>Відгуки кандидатів (${A.length})</h2><div class="m">унікальних кандидатів: ${new Set(A.map(a=>a.candidate_id||a.phone)).size}${HOOK&&TOKEN?'':' · потрібні вебхук і токен'}</div><table class="t2">${A.map(a=>`<tr><td>${esc(String(a.time).slice(0,10))}</td><td><b>${esc(a.candidate_id)}</b></td><td>${esc(a.surname)} ${esc(a.name)}<div class="m">${esc(a.phone)}</div></td><td>вак. ${a.vacancy_id}</td></tr>`).join('')}</table>`}
 function msgPanel(v){const k=[['tg','Telegram'],['wa','WhatsApp'],['ig','Instagram']].filter(x=>LINKS[x[0]]).map(x=>`<a class="lk" href="${esc(LINKS[x[0]])}" target="_blank" rel="noopener">${x[1]}</a>`).join('');
- return `<button id="cl" style="float:right">✕ Закрити</button><h2>Написати рекрутеру</h2><form id="mf"><label>ID вакансії (необов’язково)<input id="mv" value="${esc(v)}"></label><label>Повідомлення${RQ}<textarea id="mt" rows="5" required></textarea></label><button class="p" type="submit">Надіслати</button></form>${k}`}
-function applyForm(b){const v=+b.dataset.id,R=ld(RK,{});if(ld(AK,[]).some(a=>a.id==v)){b.textContent='Ви вже відгукнулись ✓';b.disabled=true;return}
+ return `<button id="cl" style="float:right">✕ Закрити</button><h2>Написати рекрутеру</h2><form id="mf"><label>ID вакансії (необов’язково)<input id="mv" value="${esc(v)}"></label><label>Контакт (телефон або нік Telegram)${RQ}<input id="mc" required value="${esc((U0&&(U0.phone||U0.tg_username))||(TG&&TG.initDataUnsafe&&TG.initDataUnsafe.user&&TG.initDataUnsafe.user.username?'@'+TG.initDataUnsafe.user.username:''))}"></label><label>Повідомлення${RQ}<textarea id="mt" rows="5" required></textarea></label><button class="p" type="submit">Надіслати</button></form>${k}`}
+function applyForm(b){const v=+b.dataset.id,R=ld(RK,{}),P=U0||{},TU=TG&&TG.initDataUnsafe&&TG.initDataUnsafe.user||{};if(ld(AK,[]).some(a=>a.id==v)){b.textContent='Ви вже відгукнулись ✓';b.disabled=true;return}
  b.insertAdjacentHTML('afterend',`<form id="af" data-id="${v}"><h3 style="margin:0">Анкета кандидата</h3>
+<label>Прізвище${RQ}<input id="fsn" required autocomplete="family-name" value="${esc(P.surname||TU.last_name)}"></label>
+<label>Ім’я${RQ}<input id="fnm" required autocomplete="given-name" value="${esc(P.name||TU.first_name)}"></label>
+<label>Телефон${RQ}<input id="fph" type="tel" required autocomplete="tel" value="${esc(P.phone)}"></label>
+<label>Email${RQ}<input id="fem" type="email" required autocomplete="email" value="${esc(P.email)}"></label>
+<label>Нік у Telegram<input id="fnk" placeholder="@username" autocomplete="off" value="${esc(TU.username?'@'+TU.username:P.tg_username)}"></label>
 <label>Дата народження${RQ}${dateSel(R.birth)}</label>
-<label>Громадянство${RQ}<select id="ac" required>${optr(CITS,R.citizenship||U0.citizenship)}</select></label>
+<label>Громадянство${RQ}<select id="ac" required>${optr(CITS,R.citizenship||P.citizenship)}</select></label>
 <label>Друге громадянство (за наявності)<select id="ac2"><option value="">Немає</option>${opt(CITS,R.citizenship2)}</select></label>
 <label>Країна проживання зараз${RQ}<select id="rcn" required>${opt(COUNTRIES,R.rcountry||'Україна')}</select></label>
 <label>Місто / населений пункт${RQ}<input id="rct" required value="${esc(R.rcity)}"></label>
@@ -260,6 +262,7 @@ function applyForm(b){const v=+b.dataset.id,R=ld(RK,{});if(ld(AK,[]).some(a=>a.i
 <label class="chk"><input type="checkbox" id="ah"${R.housing?' checked':''}>Потрібне житло</label>
 <label>Про себе<textarea id="aa" rows="3">${esc(R.about)}</textarea></label>
 ${HOOK?`<div><div class="m">Фото документів (до 10, необов’язково)</div><input type="file" id="ph" accept="image/*" multiple><label class="chk"><input type="checkbox" id="fc">Погоджуюсь передати фото документів рекрутеру</label></div>`:''}
+<label class="chk"><input type="checkbox" id="fcs" required>Погоджуюсь на обробку моїх персональних даних${RQ}</label>
 <button class="p" type="submit">Надіслати відгук</button></form>`);b.style.display='none';L()}
 function exportCsv(){const R=rows(),k=['id','url','status','days_left','first_seen','country_uk','city','specialty','title','category_uk','citizenship_uk','sal_min','sal_max','sal_cur','sal_per','fee','fee_cur','slots','accepted','hours','language_uk','description'];
  const c=v=>'"'+String(Array.isArray(v)?v.join(', '):v??'').replace(/"/g,'""')+'"',a=document.createElement('a');
@@ -275,7 +278,7 @@ document.addEventListener('click',e=>{const t=e.target,q=s=>t.closest&&t.closest
  if(q('#bap')){loadState();openP(appsPanel());return}
  if(x=q('#fv')){const id=+x.dataset.id;FAV.has(id)?FAV.delete(id):FAV.add(id);sv('rv_fav',[...FAV]);x.textContent=FAV.has(id)?'♥ В улюблених':'♡ В улюблені';nav();draw();return}
  if(x=q('#cm')){openP(msgPanel(x.dataset.id));return}
- if(q('#lo')){e.preventDefault();try{localStorage.removeItem(KEY)}catch(z){}U0=null;DH=null;closeP();gate();return}
+ if(q('#lo')){e.preventDefault();try{[KEY,RK,'rv_reg'].forEach(k=>localStorage.removeItem(k))}catch(z){}U0=null;DH=null;closeP();gate();return}
  if(q('#mr')){e.preventDefault();saveFiles();return}
  if(x=q('#ap')){applyForm(x);return}
  if(x=q('#sad')){addSub(+x.dataset.v);return}
@@ -288,20 +291,27 @@ document.addEventListener('click',e=>{const t=e.target,q=s=>t.closest&&t.closest
 let tm;$('f').addEventListener('input',e=>{if(e.target.id=='sk'){S.k=e.target.value;S.d=1}if(e.target.id=='country_uk')fillCity();clearTimeout(tm);tm=setTimeout(draw,e.target.type=='search'?250:0)});
 document.addEventListener('invalid',e=>{const f=e.target.form;if(f)f.classList.add('tried')},true);
 document.addEventListener('submit',async e=>{const f=e.target;
- if(f.id=='mf'){e.preventDefault();send('msg',{...U0,vacancy_id:$('mv').value.trim(),message:$('mt').value.trim()});f.outerHTML='<p><b>Повідомлення надіслано ✓</b></p>';return}
+ if(f.id=='mf'){
+   e.preventDefault();
+   const msgData = {...U0, contact:$('mc').value.trim(), vacancy_id:$('mv').value.trim(), message:$('mt').value.trim()};
+   send('msg', msgData);
+   f.outerHTML='<p><b>Повідомлення надіслано ✓</b></p>';
+   return;
+ }
  if(f.id!='af')return;e.preventDefault();const v=+f.dataset.id,r=D.find(x=>x.id==v),bd=+$('bd').value,bm=+$('bm').value,by=+$('by').value;
  if(new Date(by,bm-1,bd).getDate()!=bd){alert('Перевірте дату народження');return}
  const files=$('ph')?[...$('ph').files]:[];if(files.length>10){alert('Можна додати до 10 фото');return}
  if(files.length&&!$('fc').checked){alert('Підтвердьте згоду на передачу фото документів');return}
  const R={birth:{d:bd,m:bm,y:by},citizenship:$('ac').value,citizenship2:$('ac2').value,rcountry:$('rcn').value,rcity:$('rct').value.trim(),edu:(document.querySelector('input[name=edu]:checked')||{}).value,uni:$('au').value.trim(),years:$('ay').value,experience:$('ae').value.trim(),docs:$('ad').value,
   langs:[...document.querySelectorAll('.lg')].map(g=>({l:g.querySelector('.lsel').value,lv:g.querySelector('.ll').value})).filter(x=>x.l),license:[...document.querySelectorAll('.cc:checked')].map(c=>c.value),start:$('as').value,housing:$('ah').checked,about:$('aa').value.trim()};
+ const nk=$('fnk').value.trim().replace(/^@+/,'');
+ let cid=ld(CK,null);if(!cid){cid=String(Math.floor(10000+Math.random()*90000));sv(CK,cid)}
+ U0={candidate_id:cid,surname:$('fsn').value.trim(),name:$('fnm').value.trim(),phone:$('fph').value.trim(),email:$('fem').value.trim(),citizenship:R.citizenship,city:r.city,specialty:r.specialty||r.title,tg_username:nk?'@'+nk:''};sv(KEY,U0);
+ if(!ld('rv_reg',0)){send('reg',U0);sv('rv_reg',1);await new Promise(z=>setTimeout(z,900))}
  sv(RK,R);const A=ld(AK,[]);A.push({id:v,title:r.title,city:r.city,country:r.country_uk,date:new Date().toLocaleDateString('uk'),snap:{...U0,...R}});sv(AK,A);
- const p=TG?Promise.resolve('tg'):saveFiles();send('apply',{...U0,...R,birth:bstr(R.birth),langs:langStr(R.langs),license:R.license.join(', ')||'немає',housing:R.housing?'так':'ні',vacancy_id:v,vacancy:r.title,vacancy_city:r.city,vacancy_country:r.country_uk});
- const res=await p;f.outerHTML=`<p><b>Відгук надіслано ✓</b><br>${res=='tg'?'Рекрутер отримав вашу анкету та зв’яжеться з вами.':'Резюме та таблицю Excel оновлено'+(res=='file'?' у вибраній папці':res=='dl'?' (файли завантажено)':'')+'.'}</p><p id="up" class="m"></p>`;
+ const p=TG?Promise.resolve('tg'):saveFiles();send('apply',{...U0,...R,consent:'так',birth:bstr(R.birth),langs:langStr(R.langs),license:R.license.join(', ')||'немає',housing:R.housing?'так':'ні',vacancy_id:v,vacancy:r.title,vacancy_city:r.city,vacancy_country:r.country_uk});
+ const res=await p;gate();f.outerHTML=`<p><b>Відгук надіслано ✓</b><br>${res=='tg'?'Рекрутер отримав вашу анкету та зв’яжеться з вами.':'Резюме та таблицю Excel оновлено'+(res=='file'?' у вибраній папці':res=='dl'?' (файли завантажено)':'')+'.'}</p><p id="up" class="m"></p>`;
  if(files.length){const up=$('up');let n=0;for(const fl of files){up.textContent=`Завантажую фото ${++n}/${files.length}…`;try{send('doc',{surname:U0.surname,name:U0.name,phone:U0.phone,vacancy_id:v,doc_label:'Фото '+n,filename:fl.name,mime:'image/jpeg',data:await shrink(fl)})}catch(x){up.textContent='Не вдалося обробити фото '+n;return}await new Promise(z=>setTimeout(z,800))}up.textContent='Фото надіслано ✓'}});
-if(CAND){if(TG&&TG.initDataUnsafe.user){$('rn').value=TG.initDataUnsafe.user.first_name||'';$('rsn').value=TG.initDataUnsafe.user.last_name||''}
- $('rc').innerHTML='<option value="">Оберіть…</option>'+CITS.map(c=>`<option value="${c}">${c}</option>`).join('');
- $('rf').onsubmit=e=>{e.preventDefault();U0={surname:$('rsn').value.trim(),name:$('rn').value.trim(),phone:$('rp').value.trim(),email:$('re').value.trim(),citizenship:$('rc').value,city:$('rt').value.trim(),specialty:$('rs2').value.trim()};sv(KEY,U0);send('reg',U0);nav()}}
-else $('ttl').textContent+=' · для рекрутера';
+if(!CAND){$('ttl').textContent+=' · для рекрутера';}
 buildF();nav();draw();loadState();
 </script></body></html>
